@@ -554,7 +554,7 @@ compute_depth <- function(output_dir) {
   for (s in 1:dirs.l) {
     sample_name <- samples_names[s]
     coverage_sample_dir <- file.path(dir_coverage, sample_name)
-    bam_file <- full_filess[s]
+    bam_file <- full_files[s]
     if (!dir.exists(coverage_sample_dir)) {
       dir.create(coverage_sample_dir)
     }
