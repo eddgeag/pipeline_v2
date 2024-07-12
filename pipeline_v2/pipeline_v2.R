@@ -559,17 +559,16 @@ compute_depth <- function(output_dir) {
       dir.create(coverage_sample_dir)
     }
     outfile_coverage <- file.path(coverage_sample_dir, "coverage.txt")
-    if(!file.exists(outfile_coverage)){
-      
+    if (!file.exists(outfile_coverage)) {
       print(paste("computando cobertura muestra:", sample_name, "..."))
       
       comando <- paste("./compute_depth.sh", bam_file, ">", outfile_coverage)
       print(comando)
       system(comando, intern = T)
-    }else{
-      print(paste("ya esta computada la cobertura de la muestra:",sample_name))
+    } else{
+      print(paste("ya esta computada la cobertura de la muestra:", sample_name))
     }
-
+    
     
   }
   
@@ -1354,7 +1353,7 @@ wrapper_fun <- function(folder_fasta_,
                         clinvar_db_,
                         path_snpeff_,
                         path_gene_sets_,
-                        hpo_file) {
+                        hpo_file_) {
   index_bwa(folder_fasta_)
   folders_fastq_ <- list.dirs(folders_fastq_)[-1]
   number_of_samples <- length(folders_fastq_)
@@ -1458,7 +1457,7 @@ wrapper_fun <- function(folder_fasta_,
                               soi = sample_or_folder,
                               output_dir = output_dir_)
   
- salida <-  compute_depth(output_dir = output_dir_)
+  salida <-  compute_depth(output_dir = output_dir_)
   
   
 }
@@ -1481,8 +1480,8 @@ option_list <- list(
   make_option(c("-w", "--gwas_db"), type = "character", help = "Path to gwas"),
   make_option(c("-q", "--dbnsfp_db"), type = "character", help = "Path to dbnsfp"),
   make_option(c("-G", "--path_gene_sets"), type = "character", help = "Path to gene sets"),
-  make_option(c("-H", "--hpo_file"), type = "character", help = "hpo file genes to phenotype"),
-
+  make_option(c("-H", "--hpo_file"), type = "character", help = "hpo file genes to phenotype")
+  
 )
 
 # Parse arguments
@@ -1528,7 +1527,7 @@ cat("path to dbnsfp:", paste(dbnsfp_db, collapse = ", "), "\n")
 cat("path to dbsnp:", paste(dbsnp_db, collapse = ", "), "\n")
 cat("path to genesets:", paste(path_gene_sets, collapse = ", "), "\n")
 cat("path to hpo_file:", paste(hpo_file, collapse = ", "), "\n")
-cat("samples to analyze", paste(samples,collapse = ", "),"\n")
+cat("samples to analyze", paste(samples, collapse = ", "), "\n")
 # Check for missing arguments
 # Split folder_input (assuming comma-separated)
 
