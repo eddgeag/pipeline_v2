@@ -529,7 +529,7 @@ haplotype_caller <- function(output_dir,
   
 }
 
-compute_depth <- function(folder_fasta, output_dir) {
+compute_depth <- function(output_dir) {
   ## el directorio del mapeo esta creado pero lo tenemos que guardar de nuevo
   ## recuperamos los archivos bam
   mapping_output_dir <- file.path(output_dir, "mapping_output")
@@ -1352,8 +1352,7 @@ wrapper_fun <- function(folder_fasta_,
                         clinvar_db_,
                         path_snpeff_,
                         path_gene_sets_,
-                        hpo_file_,
-                        regions_) {
+                        hpo_file) {
   index_bwa(folder_fasta_)
   folders_fastq_ <- list.dirs(folders_fastq_)[-1]
   number_of_samples <- length(folders_fastq_)
@@ -1457,14 +1456,12 @@ wrapper_fun <- function(folder_fasta_,
                               soi = sample_or_folder,
                               output_dir = output_dir_)
   
-  compute_depth(folder_fasta = folder_fasta_,
-                regions = regions_,
-                output_dir = output_dir_)
+ salida <-  compute_depth(output_dir = output_dir_)
   
   
 }
 
-
+##====input variables =====
 # Define options
 # Define the option list
 option_list <- list(
@@ -1483,8 +1480,7 @@ option_list <- list(
   make_option(c("-q", "--dbnsfp_db"), type = "character", help = "Path to dbnsfp"),
   make_option(c("-G", "--path_gene_sets"), type = "character", help = "Path to gene sets"),
   make_option(c("-H", "--hpo_file"), type = "character", help = "hpo file genes to phenotype"),
-  make_option(c("-R", "--regions"), type = "character", help = "regions covered")
-  
+
 )
 
 # Parse arguments
@@ -1530,8 +1526,7 @@ cat("path to dbnsfp:", paste(dbnsfp_db, collapse = ", "), "\n")
 cat("path to dbsnp:", paste(dbsnp_db, collapse = ", "), "\n")
 cat("path to genesets:", paste(path_gene_sets, collapse = ", "), "\n")
 cat("path to hpo_file:", paste(hpo_file, collapse = ", "), "\n")
-
-print(args)
+cat("samples to analyze", paste(samples,collapse = ", "),"\n")
 # Check for missing arguments
 # Split folder_input (assuming comma-separated)
 
@@ -1553,7 +1548,5 @@ wrapper_fun(
   clinvar_db_ = clinvar_db,
   path_snpeff_ = path_snpeff,
   path_gene_sets_ = path_gene_sets,
-  hpo_file_ = hpo_file,
-  regions_ = regions
-  
+  hpo_file_ = hpo_file
 )
