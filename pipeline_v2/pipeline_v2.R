@@ -559,17 +559,19 @@ compute_depth <- function(output_dir) {
       dir.create(coverage_sample_dir)
     }
     outfile_coverage <- file.path(coverage_sample_dir, "coverage.txt")
-    print(paste("computando cobertura muestra: ", sample_name, " ...."))
+    if(!file.exists(outfile_coverage)){
+      
+      print(paste("computando cobertura muestra:", sample_name, "..."))
+      
+      comando <- paste("./compute_depth.sh", bam_file, ">", outfile_coverage)
+      print(comando)
+      system(comando, intern = T)
+    }else{
+      print(paste("ya esta computada la cobertura de la muestra:",sample_name))
+    }
+
     
-    comando <- paste("./compute_depth.sh", bam_file, ">", outfile_coverage)
-    print(comando)
-    system(comando, intern = T)
-    
-  } else{
-    print("la cobertura ya esta computada")
-    next
   }
-  
   
 }
 fun_reheader <- function(output_base, output_dir, fastq_dir) {
