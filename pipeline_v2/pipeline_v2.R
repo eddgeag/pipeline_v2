@@ -529,10 +529,8 @@ haplotype_caller <- function(output_dir,
   
 }
 
-compute_depth <- function(folder_fasta, regions, output_dir) {
+compute_depth <- function(folder_fasta, output_dir) {
   ## el directorio del mapeo esta creado pero lo tenemos que guardar de nuevo
-  
-  fasta_file <- fn_exists_fasta(folder_fasta)
   ## recuperamos los archivos bam
   mapping_output_dir <- file.path(output_dir, "mapping_output")
   dirs <- list.dirs(mapping_output_dir, recursive = F)
@@ -556,19 +554,22 @@ compute_depth <- function(folder_fasta, regions, output_dir) {
   for (s in 1:dirs.l) {
     sample_name <- samples_names[s]
     coverage_sample_dir <- file.path(dir_coverage, sample_name)
+    bam_file <- full_filess[s]
     if (!dir.exists(coverage_sample_dir)) {
       dir.create(coverage_sample_dir)
     }
-      print("computando cobertura")
-      
-      
-      
-      
-    } else{
-      print("la cobertura ya esta computada")
-      next
-    }
+    outfile_coverage <- file.path(coverage_sample_dir, "coverage.txt")
+    print(paste("computando cobertura muestra: ", sample_name, " ...."))
     
+    comando <- paste("./compute_depth.sh", bam_file, ">", outfile_coverage)
+    print(comando)
+    system(comando, intern = T)
+    
+  } else{
+    print("la cobertura ya esta computada")
+    next
+  }
+  
   
 }
 fun_reheader <- function(output_base, output_dir, fastq_dir) {
@@ -1130,8 +1131,7 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
     print("ya esta limpio y listo para post procesdado")
   }
   print("reading tsv ...")
-  files_to_exists <- list.files(file.path(output_dir,
-                                "postProcess"),
+  files_to_exists <- list.files(file.path(output_dir, "postProcess"),
                                 recursive = T,
                                 pattern = "*.csv")
   if (length(files_to_exists) == 0) {
