@@ -533,77 +533,34 @@ compute_depth <- function(folder_fasta, regions, output_dir) {
   ## el directorio del mapeo esta creado pero lo tenemos que guardar de nuevo
   
   fasta_file <- fn_exists_fasta(folder_fasta)
-  ## recuperamos el ultimo archivo bam
+  ## recuperamos los archivos bam
   mapping_output_dir <- file.path(output_dir, "mapping_output")
   dirs <- list.dirs(mapping_output_dir, recursive = F)
   dirs.l <- length(dirs)
   dirs <- dirs[-dirs.l]
-  
+  ## recuperamos el que tenemos
   full_files <- sapply(dirs[-5], function(x)
     list.files(x, full.names = T, pattern = "_bqsr.bam$"))
   
-  ## quitamos la extension del archivo
+  ## creamos el direcotrio de cobertura
   
   dir_coverage <- file.path(output_dir, "coverage_and_stats")
   if (!dir.exists(dir_coverage)) {
     dir.create(dir_coverage)
   }
+  
   samples_names <- strsplit2(dirs, "/")
   samples_names <- samples_names[, ncol(samples_names)]
+  ## buscamos los nombres de los archibvos y para cada archivo
+  ## se computa la cobertura
   for (s in 1:dirs.l) {
     sample_name <- samples_names[s]
     coverage_sample_dir <- file.path(dir_coverage, sample_name)
     if (!dir.exists(coverage_sample_dir)) {
       dir.create(coverage_sample_dir)
     }
-    outfile_coverage <-   outfile_coverage <- file.path(coverage_sample_dir, "coverage.txt")
-    if (!file.exists(outfile_coverage)) {
-      comando1 <- paste("faidx",
-                        fasta_file,
-                        "-i chromsizes >",
-                        file.path(coverage_sample_dir, "chrom.sizes"))
-      print(comando1)
-      system(comando1, intern = T)
-      comando2 <- paste(
-  'awk \'/^chr[0-9XY]*\\t/ {printf("%s\\t0\\t%s\\n",$1,$2);}\'' ,
-  paste0(fasta_file, ".fai"),
-  '> ',
-  file.path(coverage_sample_dir, "bed_split.bed")
-	)
-	print(comando2)
-	system(comando2, intern = TRUE)
-	
-      comando3 <- paste(
-        "samtools view -L",
-        file.path(coverage_sample_dir, "bed_split.bed"),
-        "-o",
-        file.path(coverage_sample_dir, "out.bam"),
-        full_files[s]
-      )
-      print(comando3)
-      system(comando3, intern = T)
-      comando4 <- paste(
-        "cat",
-        file.path(coverage_sample_dir, "chrom.sizes")
-        ,
-        "| sort -V > ",
-        file.path(coverage_sample_dir, "sizes.genome.sort")
-      )
-      print(comando4)
-      system(comando4, intern = T)
-      comando5 <- paste(
-        "bedtools coverage -a",
-        regions,
-        "-b",
-        file.path(coverage_sample_dir, "out.bam"),
-        "-g",
-        file.path(coverage_sample_dir, "sizes.genome.sort"),
-        "-sorted -hist >",
-        outfile_coverage
-      )
+      print("computando cobertura")
       
-      print(comando5)
-      system(comando5, intern = T)
       
       
       
@@ -612,7 +569,6 @@ compute_depth <- function(folder_fasta, regions, output_dir) {
       next
     }
     
-  }
   
 }
 fun_reheader <- function(output_base, output_dir, fastq_dir) {
