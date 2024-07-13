@@ -543,6 +543,7 @@ compute_depth <- function(output_dir) {
   dirs <- list.dirs(mapping_output_dir, recursive = F)
   dirs.l <- length(dirs)
   dirs <- dirs[-dirs.l]
+  dirs.l <- dirs.l-1
   ## recuperamos el que tenemos
   full_files <- sapply(dirs[-5], function(x)
     list.files(x, full.names = T, pattern = "_bqsr.bam$"))
@@ -584,7 +585,7 @@ compute_depth <- function(output_dir) {
     
       print(paste("sorteando el bam, muestra:",
             sample_name))
-      comando <- paste("samtools sort -m -@ 32 -o",
+      comando <- paste("samtools sort -@ 32 -o",
                        file.path(dir_coverage,"canonical_sorted.bam"),
                        file.path(dir_coverage,"canonical_out.bam")
       )
