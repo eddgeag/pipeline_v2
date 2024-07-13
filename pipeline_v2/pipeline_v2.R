@@ -574,31 +574,31 @@ compute_depth <- function(output_dir) {
         "..."
       ))
       comando <- paste("samtools view -L ./cobertura/canonical_regions.bed -b -o",
-                       file.path(dir_coverage,"canonical_out.bam"),
+                       file.path(coverage_sample_dir,"canonical_out.bam"),
                        bam_file)
       print(comando)
       system(comando,intern = T)
     }
-    if(!file.exists(file.path(dir_coverage,"canonical_sorted.bam"))){
+    if(!file.exists(file.path(coverage_sample_dir,"canonical_sorted.bam"))){
       
       
     
       print(paste("sorteando el bam, muestra:",
             sample_name))
       comando <- paste("samtools sort -@ 32 -o",
-                       file.path(dir_coverage,"canonical_sorted.bam"),
-                       file.path(dir_coverage,"canonical_out.bam")
+                       file.path(coverage_sample_dir,"canonical_sorted.bam"),
+                       file.path(coverage_sample_dir,"canonical_out.bam")
       )
       print(comando)
       system(command = comando,intern = T)
       
     }
     
-    if(!file.exists(file.path(dir_coverage,"canonical_sorted.bam.bai"))){
+    if(!file.exists(file.path(coverage_sample_dir,"canonical_sorted.bam.bai"))){
       print(paste("indexando el bam, muestra:",
             sample_name))
       comando <- paste("samtools index",
-                       file.path(dir_coverage,"canonical_sorted.bam"))
+                       file.path(coverage_sample_dir,"canonical_sorted.bam"))
       print(comando)
       
       system(comando,intern=T)
