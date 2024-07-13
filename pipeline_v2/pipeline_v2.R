@@ -567,7 +567,7 @@ compute_depth <- function(output_dir) {
       dir.create(coverage_sample_dir)
     }
     outfile_coverage <- file.path(coverage_sample_dir, "coverage.txt")
-    if (!file.exists(file.path(dir_coverage,"canonical_out.bam"))) {
+    if (!file.exists(file.path(coverage_sample_dir,"canonical_out.bam"))) {
       print(paste(
         "cortando el bam en canonicos, muestra:",
         sample_name,
