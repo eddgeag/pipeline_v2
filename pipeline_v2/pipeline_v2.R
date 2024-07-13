@@ -560,11 +560,37 @@ compute_depth <- function(output_dir) {
     }
     outfile_coverage <- file.path(coverage_sample_dir, "coverage.txt")
     if (!file.exists(outfile_coverage)) {
-      print(paste("computando cobertura muestra:", sample_name, "..."))
-      
-      comando <- paste("./compute_depth.sh", bam_file, ">", outfile_coverage)
+      print(paste(
+        "cortando el bam en canonicos, muestra:",
+        sample_name,
+        "..."
+      ))
+      comando <- paste("samtools view -L ./cobertura/canonical_regions.bed -b -o",
+                       file.path(dir_coverage,"canonical_out.bam"),
+                       bam_file)
       print(comando)
-      system(comando, intern = T)
+      system(comando,intern = T)
+      print("sorteando el bam, muestra",
+            sample_name,
+            "...")
+      comando <- paste("samtools sort -m -@ 32 -o",
+                       file.path(dir_coverage,"canonical_sorted.bam"),
+                       file.path(dir_coverage,"canonical_out.bam")
+      )
+      
+      print(comando)
+      system(command = comando,intern = T)
+      
+      print("computando cobertura, muestra:",sample_name)
+      
+      comando <- paste("bedtools coverage -a ./cobertura/xgen-exome_sorted.bed -b",
+                       file.path(dir_coverage,"canonical_sorted.bam"),
+                       "-g cobertura/sizes.genome -sorted -hist > ",
+                       outfile_coverage)
+      print(comando)
+      
+      system(command = comando,intern=T)
+
     } else{
       print(paste("ya esta computada la cobertura de la muestra:", sample_name))
     }
