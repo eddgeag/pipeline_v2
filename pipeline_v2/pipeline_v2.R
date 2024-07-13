@@ -606,7 +606,7 @@ compute_depth <- function(output_dir) {
     if(!file.exists(outfile_coverage)){
       print(paste("computando cobertura, muestra:",sample_name))
       comando <- paste("bedtools coverage -a ./cobertura/xgen-exome_sorted.bed -b",
-                       file.path(dir_coverage,"canonical_sorted.bam"),
+                       file.path(coverage_sample_dir,"canonical_sorted.bam"),
                        "-g cobertura/sizes.genome -sorted -hist > ",
                        outfile_coverage)
       print(comando)
