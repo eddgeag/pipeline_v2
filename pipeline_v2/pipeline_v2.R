@@ -582,8 +582,8 @@ compute_depth <- function(output_dir) {
       
       
     
-      print("sorteando el bam, muestra:",
-            sample_name)
+      print(paste("sorteando el bam, muestra:",
+            sample_name))
       comando <- paste("samtools sort -m -@ 32 -o",
                        file.path(dir_coverage,"canonical_sorted.bam"),
                        file.path(dir_coverage,"canonical_out.bam")
@@ -594,8 +594,8 @@ compute_depth <- function(output_dir) {
     }
     
     if(!file.exists(file.path(dir_coverage,"canonical_sorted.bam.bai"))){
-      print("indexando el bam, muestra:",
-            sample_name)
+      print(paste("indexando el bam, muestra:",
+            sample_name))
       comando <- paste("samtools index",
                        file.path(dir_coverage,"canonical_sorted.bam"))
       print(comando)
@@ -603,8 +603,7 @@ compute_depth <- function(output_dir) {
       system(comando,intern=T)
     }
     if(!file.exists(outfile_coverage)){
-      print("computando cobertura, muestra:",sample_name)
-      
+      print(paste("computando cobertura, muestra:",sample_name))
       comando <- paste("bedtools coverage -a ./cobertura/xgen-exome_sorted.bed -b",
                        file.path(dir_coverage,"canonical_sorted.bam"),
                        "-g cobertura/sizes.genome -sorted -hist > ",
