@@ -532,6 +532,13 @@ haplotype_caller <- function(output_dir,
 compute_depth <- function(output_dir) {
   ## el directorio del mapeo esta creado pero lo tenemos que guardar de nuevo
   ## recuperamos los archivos bam
+  ## Para computar la cobertura, primero se necesita los exones del UCSC
+  ## Nosotros los obtuvimos de xgen, pero es lo mismo, es decir cada gen entero
+  ## se trabaja con hg38 por coherencia
+  ## se extraen los chrom sizes y se filtran filtrar
+  ## se corta el bam con el bed file de los cromosomas canonicos
+  ## se sortea el bam y se hace el index
+  ##finalmente se computa la coberutra
   mapping_output_dir <- file.path(output_dir, "mapping_output")
   dirs <- list.dirs(mapping_output_dir, recursive = F)
   dirs.l <- length(dirs)
@@ -580,6 +587,14 @@ compute_depth <- function(output_dir) {
       
       print(comando)
       system(command = comando,intern = T)
+      print("indexando el bam, muestra",
+            sample_name,
+            "...")
+      comando <- paste("samtools index",
+                       file.path(dir_coverage,"canonical_sorted.bam"))
+      print(comando)
+      
+      system(comando,intern=T)
       
       print("computando cobertura, muestra:",sample_name)
       
