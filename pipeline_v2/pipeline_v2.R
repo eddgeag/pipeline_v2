@@ -1411,7 +1411,8 @@ fun_stats_and_report <- function(output_dir) {
     coverage_sample_dir <- file.path(dir_coverage, sample_name)
     aux <- gsub("_map","",sample_name)
     sample_name_ <- gsub("-",".",aux)
-    exome_sample_dir <- file.path(output_dir, "postProcess", sample_name_)
+    exome_sample_dir <- file.path(output_dir, "postProcess", sample_name_,
+                                  "post_process_canonical_filtered.csv")
     cov_file <- file.path(coverage_sample_dir, "coverage.txt")
     muestra <- sample_name
     cov_data <- read.delim(cov_file, header = F)
