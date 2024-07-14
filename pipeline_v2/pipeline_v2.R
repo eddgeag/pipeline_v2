@@ -1410,7 +1410,7 @@ fun_stats_and_report <- function(output_dir) {
     sample_name <- samples_names[s]
     coverage_sample_dir <- file.path(dir_coverage, sample_name)
     aux <- gsub("_map","",sample_name)
-    sample_name_ <- gsub("-",".",sample_name)
+    sample_name_ <- gsub("-",".",aux)
     exome_sample_dir <- file.path(output_dir, "postProcess", sample_name_)
     cov_file <- file.path(coverage_sample_dir, "coverage.txt")
     muestra <- sample_name
