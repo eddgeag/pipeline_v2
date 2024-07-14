@@ -5,7 +5,6 @@ library(tools)
 library(optparse)
 library(ggplot2)
 library(ggpubr)
-library(xtable)
 fn_exists_fasta <- function(folder_fasta) {
   extension = unlist(lapply(list.files(folder_fasta, pattern = "fa"), function(x)
     file_ext(x)))
@@ -1548,7 +1547,7 @@ fun_stats_and_report <- function(output_dir) {
     writeLines(res, fileconn)
     
     command <- paste("cat aux1.html aux2.html > ",
-                     file.path(dir_coverage, "doc.html"))
+                     file.path(coverage_sample_dir, "doc.html"))
     
     system(command)
     
