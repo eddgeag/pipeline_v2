@@ -5,6 +5,7 @@ library(tools)
 library(optparse)
 library(ggplot2)
 library(ggpubr)
+library(xtable)
 fn_exists_fasta <- function(folder_fasta) {
   extension = unlist(lapply(list.files(folder_fasta, pattern = "fa"), function(x)
     file_ext(x)))
