@@ -3,7 +3,8 @@ library(limma)
 library(dplyr)
 library(tools)
 library(optparse)
-
+library(ggplot2)
+library(ggpubr)
 fn_exists_fasta <- function(folder_fasta) {
   extension = unlist(lapply(list.files(folder_fasta, pattern = "fa"), function(x)
     file_ext(x)))
@@ -543,7 +544,7 @@ compute_depth <- function(output_dir) {
   dirs <- list.dirs(mapping_output_dir, recursive = F)
   dirs.l <- length(dirs)
   dirs <- dirs[-dirs.l]
-  dirs.l <- dirs.l-1
+  dirs.l <- dirs.l - 1
   ## recuperamos el que tenemos
   full_files <- sapply(dirs[-5], function(x)
     list.files(x, full.names = T, pattern = "_bqsr.bam$"))
@@ -567,52 +568,52 @@ compute_depth <- function(output_dir) {
       dir.create(coverage_sample_dir)
     }
     outfile_coverage <- file.path(coverage_sample_dir, "coverage.txt")
-    if (!file.exists(file.path(coverage_sample_dir,"canonical_out.bam"))) {
+    if (!file.exists(file.path(coverage_sample_dir, "canonical_out.bam"))) {
       print(paste(
         "cortando el bam en canonicos, muestra:",
         sample_name,
         "..."
       ))
-      comando <- paste("samtools view -L ./cobertura/canonical_regions.bed -b -o",
-                       file.path(coverage_sample_dir,"canonical_out.bam"),
-                       bam_file)
-      print(comando)
-      system(comando,intern = T)
-    }
-    if(!file.exists(file.path(coverage_sample_dir,"canonical_sorted.bam"))){
-      
-      
-    
-      print(paste("sorteando el bam, muestra:",
-            sample_name))
-      comando <- paste("samtools sort -@ 32 -o",
-                       file.path(coverage_sample_dir,"canonical_sorted.bam"),
-                       file.path(coverage_sample_dir,"canonical_out.bam")
+      comando <- paste(
+        "samtools view -L ./cobertura/canonical_regions.bed -b -o",
+        file.path(coverage_sample_dir, "canonical_out.bam"),
+        bam_file
       )
       print(comando)
-      system(command = comando,intern = T)
+      system(comando, intern = T)
+    }
+    if (!file.exists(file.path(coverage_sample_dir, "canonical_sorted.bam"))) {
+      print(paste("sorteando el bam, muestra:", sample_name))
+      comando <- paste(
+        "samtools sort -@ 32 -o",
+        file.path(coverage_sample_dir, "canonical_sorted.bam"),
+        file.path(coverage_sample_dir, "canonical_out.bam")
+      )
+      print(comando)
+      system(command = comando, intern = T)
       
     }
     
-    if(!file.exists(file.path(coverage_sample_dir,"canonical_sorted.bam.bai"))){
-      print(paste("indexando el bam, muestra:",
-            sample_name))
+    if (!file.exists(file.path(coverage_sample_dir, "canonical_sorted.bam.bai"))) {
+      print(paste("indexando el bam, muestra:", sample_name))
       comando <- paste("samtools index",
-                       file.path(coverage_sample_dir,"canonical_sorted.bam"))
+                       file.path(coverage_sample_dir, "canonical_sorted.bam"))
       print(comando)
       
-      system(comando,intern=T)
+      system(comando, intern = T)
     }
-    if(!file.exists(outfile_coverage)){
-      print(paste("computando cobertura, muestra:",sample_name))
-      comando <- paste("bedtools coverage -a ./cobertura/xgen-exome_sorted.bed -b",
-                       file.path(coverage_sample_dir,"canonical_sorted.bam"),
-                       "-g cobertura/sizes.genome -sorted -hist > ",
-                       outfile_coverage)
+    if (!file.exists(outfile_coverage)) {
+      print(paste("computando cobertura, muestra:", sample_name))
+      comando <- paste(
+        "bedtools coverage -a ./cobertura/xgen-exome_sorted.bed -b",
+        file.path(coverage_sample_dir, "canonical_sorted.bam"),
+        "-g cobertura/sizes.genome -sorted -hist > ",
+        outfile_coverage
+      )
       print(comando)
       
-      system(command = comando,intern=T)
-
+      system(command = comando, intern = T)
+      
     } else{
       print(paste("ya esta computada la cobertura de la muestra:", sample_name))
     }
@@ -1227,8 +1228,9 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
     ##joint
     df_clean <- right_join(looklof, df_clean, by = c("POS", "LOF"))
     
-    df_clean <- df_clean[, -grep("feature_id", colnames(df_clean))]
-    df_clean <- df_clean[!duplicated(df_clean), ]
+    df_clean <- df_clean[!duplicated(df_clean[, c("CHROM", "POS", "END", "gene_name", "nt_change")]), ]
+    # df_clean <- df_clean[, -grep("feature_id", colnames(df_clean))]
+    # df_clean <- df_clean[!duplicated(df_clean), ]
     df_clean <- df_clean[, -grep("^SAMPLE.", colnames(df_clean))]
     df_clean <- df_clean[, -grep("PGT$", colnames(df_clean))]
     df_clean <- df_clean[, -grep("_PID$", colnames(df_clean))]
@@ -1383,7 +1385,182 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
   
 }
 
+fun_stats_and_report <- function(output_dir) {
+  mapping_output_dir <- file.path(output_dir, "mapping_output")
+  dirs <- list.dirs(mapping_output_dir, recursive = F)
+  dirs.l <- length(dirs)
+  dirs <- dirs[-dirs.l]
+  dirs.l <- dirs.l - 1
+  ## recuperamos el que tenemos
+  full_files <- sapply(dirs[-5], function(x)
+    list.files(x, full.names = T, pattern = "_bqsr.bam$"))
+  
+  ## creamos el direcotrio de cobertura
+  
+  dir_coverage <- file.path(output_dir, "coverage_and_stats")
+  if (!dir.exists(dir_coverage)) {
+    dir.create(dir_coverage)
+  }
+  
+  samples_names <- strsplit2(dirs, "/")
+  samples_names <- samples_names[, ncol(samples_names)]
+  ## buscamos los nombres de los archibvos y para cada archivo
+  ## se computa la cobertura
+  for (s in 1:dirs.l) {
+    sample_name <- samples_names[s]
+    coverage_sample_dir <- file.path(dir_coverage, sample_name)
+    exome_sample_dir <- file.path(output_dir, "postProcess", sample_name)
+    cov_file <- file.path(coverage_sample_dir, "coverage.txt")
+    muestra <- sample_name
+    cov_data <- read.delim(cov_file, header = F)
+    exoma <- read.csv(exome_sample_dir)
+    interest.data <- cov_data[cov_data$V1 !=
+                                "all", "V7"]
+    mean_coverage <- round(mean(interest.data), 2)
+    mean_coverage20 <- round(mean(interest.data[interest.data > 20]), 2)
+    cov.data <- cov_data
+    
+    cov.data$V4 <- gsub("_.*", "", cov.data$V4)
+    cov.data <- cov.data[cov.data$V1 != "all", ]
+    
+    cov.data <- aggregate(V7 ~ V4, data = cov.data, mean)
+    
+    genes_totales <- length(unique(cov.data$V4))
+    
+    genes_20 <- length(cov.data[which(cov.data$V7 > 20), "V4"])
+    
+    genes_por_20 <- round(100 * genes_20 / genes_totales, 2)
+    
+    
+    genes_mayor_media <- length(cov.data[which(cov.data$V7 > mean_coverage), "V4"])
+    
+    genes_por_media <- round(100 * genes_mayor_media / genes_totales, 2)
+    
+    
+    variantes_totales.df <- as.data.frame(lapply(exoma[, c("POS", "DP")], as.numeric))
+    
+    variantes_dp <- aggregate(DP ~ POS, data = variantes_totales.df, mean)
+    
+    variantes_totales <- length(unique(variantes_dp$POS))
+    variantes_20 <- length(unique(variantes_totales.df[which(variantes_totales.df$DP >
+                                                               20), "POS"]))
+    variantes_20_x <- round(100 * variantes_20 / variantes_totales, 2)
+    
+    variantes_media <- length(unique(variantes_totales.df[which(variantes_totales.df$DP >
+                                                                  mean_coverage), "POS"]))
+    variantes_media_x <- round(100 * variantes_media / variantes_totales, 2)
+    
+    res <- as.data.frame(
+      c(
+        mean_coverage = mean_coverage,
+        mean_coverage20 = mean_coverage20,
+        genes_totales = genes_totales,
+        genes_20 = genes_20,
+        genes_por_20 = genes_por_20,
+        genes_mayor_media = genes_mayor_media,
+        genes_por_media = genes_por_media,
+        variantes_totales = variantes_totales,
+        variantes_20 = variantes_20,
+        variantes_20_x = variantes_20_x,
+        variantes_media = variantes_media,
+        variantes_media_x
+      )
+    )
+    res$Descripcion <- c(
+      "Cobertura media",
+      "Cobertura media > 20X",
+      "Genes totales",
+      "Genes > 20 X",
+      "Genes % > 20X",
+      "Genes > media",
+      "Genes % > media",
+      "Variantes totales",
+      "Variantes > 20X",
+      "Variantes % >20X",
+      "Variantes > media X",
+      "Variantes % > media X"
+    )
+    res <- res[, c(2, 1)]
+    colnames(res) <- c("Descripcion", "Stats")
+    write.csv(res,file.path(coverage_sample_dir,"stats.csv"))
+    
+    gcov <- cov_data[cov_data[, 1] == 'all', ]
+    ###
+    longitud <- 300
+    datos.pre <-
+      data.frame(
+        X = gcov[1:longitud, 2],
+        Y = 100 * (1 - cumsum(gcov[1:longitud, 5])),
+        Z = 100 * gcov[1:longitud, 5],
+        relleno = gcov[1:longitud, 1]
+      )
+    datos.pre$relleno <- as.factor(datos.pre$relleno)
+    p1 <-
+      ggplot(data = datos.pre, aes(X, Y, fill = relleno)) + geom_line(color =
+                                                                        "steelblue", linewidth = 2) + xlab("Profundidad de Cobertura") + ylab("Porcentaje de la región >= Profunidad") + theme(legend.position = "none") +
+      theme_classic()
+    p2 <-
+      ggplot(data = datos.pre, aes(X, Z, fill = relleno)) + geom_col() + scale_fill_discrete(type =
+                                                                                               "steelblue") + xlab("Profundidad de Cobertura") + ylab("Porcentaje de la región") + theme(legend.position = "none") + theme_classic()
+    
+    p3 <- ggarrange(p1, p2, ncol = 2)
+    
+    figura_file_name <- file.path(coverage_sample_dir, "cobertura.jpeg")
+    
+    p4 <-
+      annotate_figure(p3,
+                      top = paste(
+                        muestra,
+                        "Profundidad media de cobertura:",
+                        round(mean(cov_data[cov_data$V1 !=
+                                              "all", "V7"]), 2),
+                        "X"
+                      ))
+    p4
+    ggsave(filename = figura_file_name, plot = p4)
+    write.csv(res,file.path(coverage_sample_dir,"stats.csv"))
+    
+    
+    
+    blah <- paste(
+      "<p>Esta muestra se ha estudiado por el metodo de secuenciacion masiva en paralelo del exoma completo. Se analizaron",
+      res[3, 2],
+      "genes. La sensibilidad y la especificidad del metodo son superiores al 98% (SNV< 20 bp INDELS). El porcentaje de genes con una cobertura mayor a 20X es de",
+      round(as.numeric(res[5, 2]), 2),
+      "%. De todas las variantes identificadas, que son un total de",
+      res[8, 2],
+      ",",
+      res[9, 2],
+      "tienen una cobertura mayor a 20X, esto significa un",
+      round(as.numeric(res[10, 2], 2)),
+      "%.</p>"
+    )
+    
+    res <- print(xtable(res), type = "html")
+    
+    fileconn <- "./aux1.html"
+    writeLines(blah, fileconn)
+    fileconn <- "./aux2.html"
+    writeLines(res, fileconn)
+    
+    command <- paste("cat aux1.html aux2.html > ",
+                     file.path(dir_coverage, "doc.html"))
+    
+    system(command)
+    
+    command <- paste(
+      "pandoc --output",
+      file.path(coverage_sample_dir, "reporte.docx"),
+      file.path(coverage_sample_dir, "doc.html")
+    )
+    
+    system(command)
+    
+  }
+  
 
+  
+}
 
 
 wrapper_fun <- function(folder_fasta_,
@@ -1507,7 +1684,7 @@ wrapper_fun <- function(folder_fasta_,
   
   salida <-  compute_depth(output_dir = output_dir_)
   
-  
+  salida <- fun_stats_and_report(output_dir = output_dir_)
 }
 
 ##====input variables =====
