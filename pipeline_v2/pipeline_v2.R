@@ -1776,6 +1776,7 @@ cat("samples to analyze", paste(samples, collapse = ", "), "\n")
 # Split folder_input (assuming comma-separated)
 
 # Access arguments
+start_time <- Sys.time()
 
 wrapper_fun(
   folder_fasta_ = folder_fasta,
@@ -1795,3 +1796,12 @@ wrapper_fun(
   path_gene_sets_ = path_gene_sets,
   hpo_file_ = hpo_file
 )
+
+end_time <- Sys.time()
+
+tiempo <- end_time-start_time
+
+print(paste("acabo con un tiempo de ",tiempo))
+
+
+
