@@ -1229,7 +1229,9 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
     ##joint
     df_clean <- right_join(looklof, df_clean, by = c("POS", "LOF"))
     
-    df_clean <- df_clean[!duplicated(df_clean[, -grep("feature_id", colnames(df_clean))]), ]
+    df_clean <- df_clean[!duplicated(df_clean[, c("CHROM", "POS", "END", "gene_name", "nt_change")]), ]
+    # df_clean <- df_clean[, -grep("feature_id", colnames(df_clean))]
+    # df_clean <- df_clean[!duplicated(df_clean), ]
     df_clean <- df_clean[, -grep("^SAMPLE.", colnames(df_clean))]
     df_clean <- df_clean[, -grep("PGT$", colnames(df_clean))]
     df_clean <- df_clean[, -grep("_PID$", colnames(df_clean))]
@@ -1326,6 +1328,9 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
       grep_samples_aux <- as.data.frame(apply(grep_samples, 2, function(columna)
         aux_unique_fun(columna)))
       
+      print(grep_samples_aux)
+      print(class(grep_samples_aux))
+      
       final[, grep("^DX", colnames(final))] <- grep_samples_aux
       
       n_hom_alt <- colSums(apply(grep_samples_aux, 1, function(x)
@@ -1356,19 +1361,6 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
         file = file.path(dir_out, soi, "post_process_canonical_filtered.csv"),
         row.names = F
       )
-      
-      ## filtrado rapido
-      
-      final_filtered <- final[which(!is.na(final$ALLELEID)), ]
-      final_filtered <- final_filtered[-grep("benign", ignore.case = T, x =
-                                               final_filtered$CLNSIG), ]
-      
-      write.csv(
-        final,
-        file = file.path(dir_out, soi, "filtered_canonical_benign_and_bd.csv"),
-        row.names = F
-      )
-      
       
       ## unicas
       
@@ -1421,14 +1413,10 @@ fun_stats_and_report <- function(output_dir) {
   for (s in 1:dirs.l) {
     sample_name <- samples_names[s]
     coverage_sample_dir <- file.path(dir_coverage, sample_name)
-    aux <- gsub("_map", "", sample_name)
-    sample_name_ <- gsub("-", ".", aux)
-    exome_sample_dir <- file.path(
-      output_dir,
-      "postProcess",
-      sample_name_,
-      "post_process_canonical_filtered.csv"
-    )
+    aux <- gsub("_map","",sample_name)
+    sample_name_ <- gsub("-",".",aux)
+    exome_sample_dir <- file.path(output_dir, "postProcess", sample_name_,
+                                  "post_process_canonical_filtered.csv")
     cov_file <- file.path(coverage_sample_dir, "coverage.txt")
     muestra <- sample_name
     cov_data <- read.delim(cov_file, header = F)
@@ -1501,7 +1489,7 @@ fun_stats_and_report <- function(output_dir) {
     )
     res <- res[, c(2, 1)]
     colnames(res) <- c("Descripcion", "Stats")
-    write.csv(res, file.path(coverage_sample_dir, "stats.csv"))
+    write.csv(res,file.path(coverage_sample_dir,"stats.csv"))
     
     gcov <- cov_data[cov_data[, 1] == 'all', ]
     ###
@@ -1537,7 +1525,7 @@ fun_stats_and_report <- function(output_dir) {
                       ))
     p4
     ggsave(filename = figura_file_name, plot = p4)
-    write.csv(res, file.path(coverage_sample_dir, "stats.csv"))
+    write.csv(res,file.path(coverage_sample_dir,"stats.csv"))
     
     
     
@@ -1577,7 +1565,7 @@ fun_stats_and_report <- function(output_dir) {
     
   }
   
-  
+
   
 }
 
@@ -1776,7 +1764,6 @@ cat("samples to analyze", paste(samples, collapse = ", "), "\n")
 # Split folder_input (assuming comma-separated)
 
 # Access arguments
-start_time <- Sys.time()
 
 wrapper_fun(
   folder_fasta_ = folder_fasta,
@@ -1796,12 +1783,3 @@ wrapper_fun(
   path_gene_sets_ = path_gene_sets,
   hpo_file_ = hpo_file
 )
-
-end_time <- Sys.time()
-
-tiempo <- end_time-start_time
-
-print(paste("acabo con un tiempo de ",tiempo))
-
-
-
