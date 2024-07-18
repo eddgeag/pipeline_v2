@@ -1185,7 +1185,7 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
   files_to_exists <- list.files(file.path(output_dir, "postProcess"),
                                 recursive = T,
                                 pattern = "*.csv")
-  if (length(files_to_exists) == 0) {
+  if (length(files_to_exists) == 0) { 
     tsv <- read.delim(file.path(dir_out, "pre_tsv.tsv"), na.strings = ".")
     print("reading done .")
     df_clean <- tsv[, colSums(is.na(tsv)) != nrow(tsv)]
@@ -1227,8 +1227,9 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
     looklof <- as.data.frame(looklof)
     looklof$POS <- as.numeric(looklof$POS)
     ##joint
-    df_clean <- right_join(looklof, df_clean, by = c("POS", "LOF"))
-    
+    df_clean <- as.data.frame(right_join(looklof, df_clean, by = c("POS", "LOF")))
+    print("hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    print(colnames(df_clean))
     df_clean <- df_clean[!duplicated(df_clean[, c("CHROM", "POS", "END", "gene_name", "nt_change")]), ]
     # df_clean <- df_clean[, -grep("feature_id", colnames(df_clean))]
     # df_clean <- df_clean[!duplicated(df_clean), ]
