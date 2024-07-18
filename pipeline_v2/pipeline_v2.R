@@ -1230,7 +1230,7 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
     df_clean <- as.data.frame(right_join(looklof, df_clean, by = c("POS", "LOF")))
     print("hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
     print(colnames(df_clean))
-    df_clean <- df_clean[!duplicated(df_clean[, c("CHROM", "POS", "END", "gene_name", "nt_change")]), ]
+    df_clean <- df_clean[!duplicated(df_clean[, c("CHROM", "POS", "gene_name", "nt_change")]), ]
     # df_clean <- df_clean[, -grep("feature_id", colnames(df_clean))]
     # df_clean <- df_clean[!duplicated(df_clean), ]
     df_clean <- df_clean[, -grep("^SAMPLE.", colnames(df_clean))]
