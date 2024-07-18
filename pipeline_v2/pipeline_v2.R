@@ -1185,7 +1185,7 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
   files_to_exists <- list.files(file.path(output_dir, "postProcess"),
                                 recursive = T,
                                 pattern = "*.csv")
-  if (length(files_to_exists) == 0) { 
+
     tsv <- read.delim(file.path(dir_out, "pre_tsv.tsv"), na.strings = ".")
     print("reading done .")
     df_clean <- tsv[, colSums(is.na(tsv)) != nrow(tsv)]
@@ -1330,9 +1330,7 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
       print("herreeeee pro arriba")
       grep_samples_aux <- as.data.frame(lapply(grep_samples, 2, function(columna)
         aux_unique_fun(columna)))
-      
-      print(grep_samples_aux)
-      print(class(grep_samples_aux))
+    
       
       final[, grep("^DX", colnames(final))] <- grep_samples_aux
       
@@ -1368,8 +1366,9 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
       ## unicas
       
       print("write unique variants of the sample of interest")
-      
       final.unicas <- final[final$N == 1, ]
+      print("unicas")
+      print(head(final.unicas))
       
       write.csv(
         final.unicas,
@@ -1384,9 +1383,7 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
       rm(list = "final")
     }
     
-  } else{
-    print("ya estan procesados los archivos")
-  }
+
   
   ##end for
   
