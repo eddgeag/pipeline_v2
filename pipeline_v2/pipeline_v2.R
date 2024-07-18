@@ -1325,7 +1325,8 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
         
         return(X)
       }
-      
+      print("hereeeeeeeeeeeeeeeeeeeeeee")
+      print(grep_samples_aux)
       grep_samples_aux <- as.data.frame(apply(grep_samples, 2, function(columna)
         aux_unique_fun(columna)))
       
