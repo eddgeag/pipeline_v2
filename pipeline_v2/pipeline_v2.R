@@ -686,7 +686,8 @@ fun_merge <- function(output_dir,
   output_file_name <- file_path_sans_ext(output_file_name)
   out_dir <- file.path(output_dir, "variantCalling", output_file_name)
   
-  
+  print("HEREEEEEE")
+  print(samples)
   if (!is.null(file_cohort)) {
     print("HA SIDO NULL")
     file_reheader <- list.files(
