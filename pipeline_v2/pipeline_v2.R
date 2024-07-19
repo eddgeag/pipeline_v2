@@ -696,7 +696,7 @@ fun_merge <- function(output_dir,
       full.names = T,
       recursive = T
     )
-    
+    print(file_reheader)
     writeLines(file_reheader, "./samples_to_merge.list")
     
     
