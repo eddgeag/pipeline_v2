@@ -688,6 +688,7 @@ fun_merge <- function(output_dir,
   
   
   if (!is.null(file_cohort)) {
+    print("HA SIDO NULL")
     file_reheader <- list.files(
       out_dir,
       pattern = "reheader.g.vcf.gz$",
@@ -713,6 +714,8 @@ fun_merge <- function(output_dir,
     
   } else{
     files_to_merge <- vector(mode = "character", length = length(samples))
+    print("NO  SIDO NULL")
+    print(files_to_merge)
     
     for (s in 1:length(samples)) {
       sample <- samples[s]
@@ -1650,48 +1653,48 @@ wrapper_fun <- function(folder_fasta_,
     output_cohort = cohort_output_
   )
   
-  salida <- genotypeGVCF(
-    folder_fasta = folder_fasta_,
-    output_dir = output_dir_,
-    cohort_file = cohort_output_,
-    file_gatk = folder_gatk_
-  )
-  
-  salida <- variantRecallibrator(
-    folder_fasta = folder_fasta_,
-    folder_data_gatk = folder_data_gatk_,
-    output_dir = output_dir_,
-    file_gatk = folder_gatk_,
-    cohort_file = cohort_output_
-  )
-  
-  
-  salida <- applyVQSR(
-    folder_fasta = folder_fasta_,
-    output_dir = output_dir_,
-    cohort_file = cohort_output_
-  )
-  
-  salida <- analysisReady(output_dir = output_dir_, cohort_file = cohort_output_)
-  
-  salida <- anotation(
-    path_snpeff = path_snpeff_,
-    output_dir = output_dir_,
-    clinvar_db = clinvar_db_,
-    dbsnp_db = dbsnp_db_,
-    gwas_db = gwas_db_,
-    dbnsfp_db = dbnsfp_db_,
-    cohort_file = cohort_output_,
-    path_gene_sets = path_gene_sets_
-  )
-  
-  salida <-  fun_post_process(hpo_file = hpo_file_,
-                              soi = sample_or_folder,
-                              output_dir = output_dir_)
-  
-  salida <-  compute_depth(output_dir = output_dir_)
-  
-  salida <- fun_stats_and_report(output_dir = output_dir_)
+  # salida <- genotypeGVCF(
+  #   folder_fasta = folder_fasta_,
+  #   output_dir = output_dir_,
+  #   cohort_file = cohort_output_,
+  #   file_gatk = folder_gatk_
+  # )
+  # 
+  # salida <- variantRecallibrator(
+  #   folder_fasta = folder_fasta_,
+  #   folder_data_gatk = folder_data_gatk_,
+  #   output_dir = output_dir_,
+  #   file_gatk = folder_gatk_,
+  #   cohort_file = cohort_output_
+  # )
+  # 
+  # 
+  # salida <- applyVQSR(
+  #   folder_fasta = folder_fasta_,
+  #   output_dir = output_dir_,
+  #   cohort_file = cohort_output_
+  # )
+  # 
+  # salida <- analysisReady(output_dir = output_dir_, cohort_file = cohort_output_)
+  # 
+  # salida <- anotation(
+  #   path_snpeff = path_snpeff_,
+  #   output_dir = output_dir_,
+  #   clinvar_db = clinvar_db_,
+  #   dbsnp_db = dbsnp_db_,
+  #   gwas_db = gwas_db_,
+  #   dbnsfp_db = dbnsfp_db_,
+  #   cohort_file = cohort_output_,
+  #   path_gene_sets = path_gene_sets_
+  # )
+  # 
+  # salida <-  fun_post_process(hpo_file = hpo_file_,
+  #                             soi = sample_or_folder,
+  #                             output_dir = output_dir_)
+  # 
+  # salida <-  compute_depth(output_dir = output_dir_)
+  # 
+  # salida <- fun_stats_and_report(output_dir = output_dir_)
 }
 
 ##====input variables =====
