@@ -679,12 +679,8 @@ fun_merge <- function(output_dir,
                       output_cohort) {
   fasta_file <- fn_exists_fasta(folder_fasta)
   
-  fastq_files <- list.files(fastq_dir, full.names = F)
-  output_file_name <-
-    unlist(strsplit(gsub("R[12]", "map", fastq_files[1]), "/"))
-  
-  output_file_name <- file_path_sans_ext(output_file_name)
-  out_dir <- file.path(output_dir, "variantCalling", output_file_name)
+
+  out_dir <- file.path(output_dir, "variantCalling")
   
   print("HEREEEEEE")
   print(samples)
