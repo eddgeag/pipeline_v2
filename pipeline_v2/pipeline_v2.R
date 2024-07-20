@@ -544,10 +544,10 @@ compute_depth <- function(output_dir) {
   mapping_output_dir <- file.path(output_dir, "mapping_output")
   dirs <- list.dirs(mapping_output_dir, recursive = F)
   dirs.l <- length(dirs)
-  dirs <- dirs[-dirs.l]
-  dirs.l <- dirs.l - 1
+  # dirs <- dirs[-dirs.l]
+  # dirs.l <- dirs.l - 1
   ## recuperamos el que tenemos
-  full_files <- sapply(dirs[-5], function(x)
+  full_files <- sapply(dirs, function(x)
     list.files(x, full.names = T, pattern = "_bqsr.bam$"))
   
   ## creamos el direcotrio de cobertura
@@ -679,7 +679,7 @@ fun_merge <- function(output_dir,
                       output_cohort) {
   fasta_file <- fn_exists_fasta(folder_fasta)
   
-
+  
   out_dir <- file.path(output_dir, "variantCalling")
   
   print("HEREEEEEE")
@@ -1182,10 +1182,16 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
     print("ya esta limpio y listo para post procesdado")
   }
   print("reading tsv ...")
-  files_to_exists <- list.files(file.path(output_dir, "postProcess"),
-                                recursive = T,
-                                pattern = "*.csv")
-
+  files_to_exists <- list.files(
+    file.path(output_dir, "postProcess"),
+    recursive = T,
+    pattern = "_filtered.csv",
+    full.names = T
+  )
+  files_to_exists.l <- length(which(files_to_exists == T))
+  dirs_exists.l <- length(list.dirs(file.path(output_dir, "postProcess"),recursive = F))
+  
+  if (files_to_exists.l != dirs_exists.l) {
     tsv <- read.delim(file.path(dir_out, "pre_tsv.tsv"), na.strings = ".")
     print("reading done .")
     df_clean <- tsv[, colSums(is.na(tsv)) != nrow(tsv)]
@@ -1326,11 +1332,11 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
         return(X)
       }
       print("hereeeeeeeeeeeeeeeeeeeeeee")
-      print(head(grep_samples,1))
+      print(head(grep_samples, 1))
       print("herreeeee pro arriba")
       grep_samples_aux <- as.data.frame(lapply(grep_samples, function(columna)
         aux_unique_fun(columna)))
-    
+      
       
       final[, grep("^DX", colnames(final))] <- grep_samples_aux
       
@@ -1382,8 +1388,10 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
       
       rm(list = "final")
     }
-    
-
+  }else{
+    print("cuidado porque ya esta pero hay que modificar")
+  }
+  
   
   ##end for
   
@@ -1413,10 +1421,14 @@ fun_stats_and_report <- function(output_dir) {
   for (s in 1:dirs.l) {
     sample_name <- samples_names[s]
     coverage_sample_dir <- file.path(dir_coverage, sample_name)
-    aux <- gsub("_map","",sample_name)
-    sample_name_ <- gsub("-",".",aux)
-    exome_sample_dir <- file.path(output_dir, "postProcess", sample_name_,
-                                  "post_process_canonical_filtered.csv")
+    aux <- gsub("_map", "", sample_name)
+    sample_name_ <- gsub("-", ".", aux)
+    exome_sample_dir <- file.path(
+      output_dir,
+      "postProcess",
+      sample_name_,
+      "post_process_canonical_filtered.csv"
+    )
     cov_file <- file.path(coverage_sample_dir, "coverage.txt")
     muestra <- sample_name
     cov_data <- read.delim(cov_file, header = F)
@@ -1489,7 +1501,7 @@ fun_stats_and_report <- function(output_dir) {
     )
     res <- res[, c(2, 1)]
     colnames(res) <- c("Descripcion", "Stats")
-    write.csv(res,file.path(coverage_sample_dir,"stats.csv"))
+    write.csv(res, file.path(coverage_sample_dir, "stats.csv"))
     
     gcov <- cov_data[cov_data[, 1] == 'all', ]
     ###
@@ -1525,7 +1537,7 @@ fun_stats_and_report <- function(output_dir) {
                       ))
     p4
     ggsave(filename = figura_file_name, plot = p4)
-    write.csv(res,file.path(coverage_sample_dir,"stats.csv"))
+    write.csv(res, file.path(coverage_sample_dir, "stats.csv"))
     
     
     
@@ -1565,7 +1577,7 @@ fun_stats_and_report <- function(output_dir) {
     
   }
   
-
+  
   
 }
 
@@ -1656,7 +1668,7 @@ wrapper_fun <- function(folder_fasta_,
     cohort_file = cohort_output_,
     file_gatk = folder_gatk_
   )
-
+  
   salida <- variantRecallibrator(
     folder_fasta = folder_fasta_,
     folder_data_gatk = folder_data_gatk_,
@@ -1664,16 +1676,16 @@ wrapper_fun <- function(folder_fasta_,
     file_gatk = folder_gatk_,
     cohort_file = cohort_output_
   )
-
-
+  
+  
   salida <- applyVQSR(
     folder_fasta = folder_fasta_,
     output_dir = output_dir_,
     cohort_file = cohort_output_
   )
-
+  
   salida <- analysisReady(output_dir = output_dir_, cohort_file = cohort_output_)
-
+  
   salida <- anotation(
     path_snpeff = path_snpeff_,
     output_dir = output_dir_,
@@ -1684,13 +1696,13 @@ wrapper_fun <- function(folder_fasta_,
     cohort_file = cohort_output_,
     path_gene_sets = path_gene_sets_
   )
-
+  
   salida <-  fun_post_process(hpo_file = hpo_file_,
                               soi = sample_or_folder,
                               output_dir = output_dir_)
-
+  
   salida <-  compute_depth(output_dir = output_dir_)
-
+  
   salida <- fun_stats_and_report(output_dir = output_dir_)
 }
 
