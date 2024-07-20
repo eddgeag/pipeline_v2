@@ -1188,7 +1188,7 @@ fun_post_process <- function(hpo_file, sois, output_dir) {
     pattern = "_filtered.csv",
     full.names = T
   )
-  files_to_exists.l <- length(which(files_to_exists == T))
+  files_to_exists.l <- length(which(sapply(files_to_exists,file.exists)==T))
   dirs_exists.l <- length(list.dirs(file.path(output_dir, "postProcess"),recursive = F))
   
   if (files_to_exists.l != dirs_exists.l) {
